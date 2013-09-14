@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <title>Book Scanner</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="site.css">
+</head>
+<body>
+
+  <ul class="nav">
+
+      <li id="scanner" class="active" data-pane="0">
+        <a href="#">
+          <i class="icon-scanner"></i>
+          <span data-i18n="nav.scanner"></span>
+        </a>
+      </li>
+
+      <li id="loans" data-pane="1">
+        <a href="#">
+          <i class="icon-loans"></i>
+          <span data-i18n="nav.loans"></span>
+        </a>
+      </li>
+
+      <li id="favs" data-pane="2">
+        <a href="#">
+          <i class="icon-favs"></i>
+          <span data-i18n="nav.favs"></span>
+        </a>
+      </li>
+
+      <li id="search" data-pane="3">
+        <a href="#">
+          <i class="icon-search"></i>
+          <span data-i18n="nav.search"></span>
+        </a>
+      </li>
+
+<!--
+      <li id="favs">
+        <a href="#">
+          <div>
+            <img src="img/ikon_hjerte.png" />
+            <img src="img/ikon_hjerte_valgt.png" class="active" />
+          </div>
+          <span data-i18n="nav.favs"></span>
+        </a>
+      </li>
+
+      <li id="search">
+        <a href="#">
+          <div>
+            <img src="img/ikon_sok.png" />
+            <img src="img/ikon_sok_valgt.png" class="active" />
+          </div>
+          <span data-i18n="nav.search"></span>
+        </a>
+      </li>-->
+
+    </ul>
+
+    <div  class="page">
+    <div id="carousel">
+    <ul>
+
+        <li>
+            <div class="container empty" id="page-scanner">
+
+              <div class="book-info">
+              </div>
+
+            </div>
+        </li>
+
+        <li>
+            <div class="container">
+
+              <button class="activate" id="btn_reg_laanekort">Registrer lånekort</button>
+
+            </div>
+        </li>
+
+        <li>
+            <div class="container" style="background:url(img/navbar_favs.png) no-repeat center center; background-size: 60%;">
+
+            </div>
+        </li>
+
+        <li>
+            <div class="container" style="background:url(img/navbar_search.png) no-repeat center center; background-size: 60%;">
+
+            </div>
+        </li>
+
+      </ul>
+    </div>
+  </div>
+
+
+<script type="text/javascript" src="js/libs/jquery-2.0.3.min.js"></script>
+<script type="text/javascript" src="js/libs/i18next-1.6.3.min.js"></script> 
+<script type="text/javascript" src="js/libs/quo.js"></script>
+<script type="text/javascript" src="js/app.js"></script>
+
+<!-- https://github.com/alexblack/google-fastbutton -->
+<!--
+<script type="text/javascript" src="js/google.fastbutton.js"></script>
+<script type="text/javascript" src="js/jquery.google.fastbutton.js"></script>
+-->
+
+<script type="text/javascript">
+
+
+function Carousel(element) {
+
+    element = $(element);
+
+    var self = this;
+
+    var container = $(">ul", element);
+    var panes = $(">ul>li", element);
+
+    var pane_width = 0;
+    var pane_count = panes.length;
+    var current_pane = 0;
+
+    console.info("Found " + pane_count + " panes");
+
+    /**
+     * set the pane dimensions and scale the container
+     */
+    function setPaneDimensions() {
+        //console.info("Update pane dim.");
+        pane_width = element.width();
+        panes.each(function() {
+            $(this).width(pane_width);
+        });
+        container.width(pane_width*pane_count);
+    };
+
+
+    /**
+     * show pane by index
+     * @param   {Number}    index
+     */
+    this.showPane = function( index ) {
+        // between the bounds
+        index = Math.max(0, Math.min(index, pane_count-1));
+        current_pane = index;
+
+        $('.nav li').removeClass('active');
+        $('.nav li:nth-child('+(current_pane+1) +')').addClass('active');
+
+        var offset = -((100/pane_count)*current_pane);
+        setContainerOffset(offset, true);
+    };
+
+    this.showPrev = function() {
+        this.showPane(current_pane == 0 ? pane_count - 1 : current_pane - 1);
+    };
+
+    this.showNext = function() {
+        this.showPane(current_pane == pane_count-1 ? 0 : current_pane + 1);
+    };
+
+
+    function setContainerOffset(percent, animate) {
+        container.removeClass('animate');
+
+        if(animate) {
+            container.addClass('animate');
+        }
+
+        container.css('transform', 'translate3d(' + percent + '%,0,0) scale3d(1,1,1)');
+
+    }
+    /**
+     * Init
+     */
+    this.init = function() {
+
+        setPaneDimensions();
+        $(window).on("load resize orientationchange", function() {
+            setPaneDimensions();
+            //updateOffset();
+        });
+
+    }
+}
+
+var carousel = new Carousel("#carousel");
+
+
+ i18n.init({
+    debug: true,
+    lng: 'nb',
+  }, function(t) {
+    // translate nav
+    $(".nav").i18n();
+
+    // programatical access
+    var appName = t("app.name");
+  });
+
+  $$(document).ready(function() {
+
+    $$('.nav a').tap(function(e) {
+      e.preventDefault();
+      var li = $$(this).closest('li');
+
+      carousel.showPane(li.data('pane'));
+    });
+
+    $$('#btn_reg_laanekort').tap(function(e) {
+      window.JSInterface.registerPatronCard();
+    });
+
+    $('button').on('touchstart', function(e) {
+      e.preventDefault();
+      $(this).addClass('active');
+    }).on('touchcancel', function(e) {
+      $(this).removeClass('active');
+    }).on('touchend', function(e) {
+      $(this).removeClass('active');
+    })
+/*
+    $('#btn_reg_laanekort').fastClick(function(e) {
+  alert('fast clicked!');
+});*/
+
+    carousel.init();
+
+    $$('#carousel').swipeLeft(function(e) {
+      e.preventDefault();
+      carousel.showNext();
+
+    });
+
+    $$('#carousel').swipeRight(function(e) {
+      e.preventDefault();
+      carousel.showPrev();
+
+    });
+
+  });
+
+
+  function viewBook(book) {
+
+        console.log(book);
+        $('#page-scanner').removeClass('working');
+        var view = $('#page-scanner .book-info');
+
+        view.html('');
+        if (book.thumb) {
+            view.append('<div class="zoomTarget" data-closeclick="true" style="float:right; max-width:35%;"><img src="' + book.thumb + '" class="magnify" style="width: 100%;" /></div>');
+        }
+        view.append('<a href="http://ask.bibsys.no/ask/action/show?pid=' + book.objektid + '&kid=biblio"><strong>' + book.title + ' ' + book.subtitle + '</strong></a> (' + book.year + ')<br />');
+
+        if (book.main_author) {
+            view.append('av ' + book.main_author.name + '<br />');
+        }
+        if (book.added_author !== undefined ) {
+            view.append('Annen forfatter/redaktør: ' + book.added_author + '<br />');
+        }
+        view.append(book.pages + '<br />');
+
+        if (book.isbn) {
+            var url = 'http://no.wikipedia.org/w/index.php?title=Spesial%3ABokkilder&isbn=' + book.isbn;
+            view.append('ISBN: <a href="' + url + '">' + book.isbn + '</a><br />');
+        }
+
+        if (book.klass !== undefined) {
+            var klasses = [];
+            for (var i = 0; i < book.klass.length; i++) {
+                klasses.push(book.klass[i].kode);
+            }
+            view.append('Klass: ' + klasses.join(', ') + '<br />');
+        }
+
+        if (book.subjects !== undefined) {
+            var subjects = [];
+            for (var i = 0; i < book.subjects.length; i++) {
+                subjects.push(book.subjects[i].emne + ' <small>('+book.subjects[i].system + ')</small>');
+            }
+            view.append('Emner: ' + subjects.join(', ') + '<br />');
+        }
+
+        //$(".zoomTarget").zoomTarget();
+        view.show();
+
+  }
+
+
+  function tagDiscovered() {
+    carousel.showPane(0);
+    $('#page-scanner').removeClass('empty').addClass('working');
+  }
+
+  function tagReadingError() {
+    $('#page-scanner').removeClass('working').addClass('empty');
+  }
+
+  var working = false;
+  function foundTag(barcode) {
+    if (working) return;
+    working = true;
+
+    new Bibio(barcode, function(book) {
+      working = false;
+      if (book !== undefined) {
+        viewBook(book);
+      }
+    });
+  }
+
+  </script>
+
+</body> 
+</html>

@@ -1,0 +1,11 @@
+{
+  "app": {
+    "name": "BokSkanner"
+  },
+  "nav": {
+    "scanner": "Skann",
+    "loans": "Mine lån",
+    "favs": "Favoritter",
+    "search": "Søk"
+  }
+}
